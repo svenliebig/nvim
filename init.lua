@@ -88,7 +88,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -124,7 +124,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -259,6 +259,16 @@ require('lazy').setup({
         end,
       },
     },
+    -- opts = {
+    --   extensions = {
+    --     fzf = {
+    --       fuzzy = true,
+    --       override_generic_sorter = true,
+    --       override_file_sorter = true,
+    --       case_mode = "smart_case"
+    --     }
+    --   }
+    -- },
   },
 
   {
@@ -294,6 +304,11 @@ vim.o.hlsearch = false
 
 -- Make line numbers default
 vim.wo.number = true
+
+-- Load vim Autogroup to toggle Linenumbers in Normal / Insert Mode
+vim.cmd([[
+  source ~/.config/nvim/vim/linenumbers.vim
+]])
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -360,8 +375,19 @@ require('telescope').setup {
   defaults = {
     mappings = {
       i = {
-        ['<C-u>'] = false,
-        ['<C-d>'] = false,
+        -- ['<C-u>'] = false,
+        -- ['<C-d>'] = false,
+      },
+    },
+    layout_config = {
+      prompt_position = 'bottom',
+      horizontal = {
+        width = 0.9,
+        height = 0.9,
+      },
+      vertical = {
+        width = 0.9,
+        height = 0.9,
       },
     },
   },
@@ -440,7 +466,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'pkl', 'python' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -562,17 +588,17 @@ local on_attach = function(client, bufnr)
 end
 
 local function spread(template)
-    local result = {}
-    for key, value in pairs(template) do
-        result[key] = value
-    end
+  local result = {}
+  for key, value in pairs(template) do
+    result[key] = value
+  end
 
-    return function(table)
-        for key, value in pairs(table) do
-            result[key] = value
-        end
-        return result
+  return function(table)
+    for key, value in pairs(table) do
+      result[key] = value
     end
+    return result
+  end
 end
 
 local withMotions = spread(require('which-key.plugins.presets.init').motions)
@@ -619,6 +645,7 @@ local servers = {
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
+  eslint = {},
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
@@ -636,6 +663,15 @@ require('neodev').setup()
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
+local function organize_imports()
+  local params = {
+    command = "_typescript.organizeImports",
+    arguments = { vim.api.nvim_buf_get_name(0) },
+    title = ""
+  }
+  vim.lsp.buf.execute_command(params)
+end
+
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
@@ -650,6 +686,12 @@ mason_lspconfig.setup_handlers {
       on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
+      commands = {
+        OrganizeImports = {
+          organize_imports,
+          description = "Organize Imports"
+        }
+      }
     }
   end,
 }

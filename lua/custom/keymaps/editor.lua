@@ -17,7 +17,10 @@ vim.keymap.set('i', '<C-a>', 'copilot#Accept()',
 
 
 -- substitude current selection in file
-vim.keymap.set("v", "<leader>cs", "y:%s/<C-r>0/<C-r>0/gI<Left><Left><Left>", { desc = '[C]ode [S]ubstitude current selectio in file' })
+vim.keymap.set("v", "<leader>csf", "y:%s/<C-r>0/<C-r>0/gI<Left><Left><Left>",
+  { desc = '[C]ode [S]ubstitude selection in [F]ile' })
+vim.keymap.set("v", "<leader>csl", "y:s/<C-r>0/<C-r>0/gI<Left><Left><Left>",
+  { desc = '[C]ode [S]ubstitude selection in [L]ile' })
 
 -- vim.keymap.set('n', '<leader>rw', '"_dwP', { desc = 'Replace word with register' })
 -- vim.keymap.set('n', '<leader>rW', '"_dWP', { desc = 'Replace WORD with register' })
@@ -32,5 +35,5 @@ vim.keymap.set("v", "<leader>cs", "y:%s/<C-r>0/<C-r>0/gI<Left><Left><Left>", { d
 -- vim.keymap.set('n', '<leader>ri"', '"_di"P', { desc = 'Replace inner \" quoted string with register' })
 -- vim.keymap.set('n', '<leader>ra"', '"_da"P', { desc = 'Replace outer \" quoted string with register' })
 
--- tes2 tes2 
+-- tes2 tes2
 --

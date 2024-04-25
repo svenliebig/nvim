@@ -370,10 +370,15 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
   defaults = {
+    path_display = {
+      "truncate"
+    },
     mappings = {
       i = {
         -- ['<C-u>'] = false,
         -- ['<C-d>'] = false,
+        ["<C-j>"] = require('telescope.actions').cycle_history_prev,
+        ["<C-k>"] = require('telescope.actions').cycle_history_next
       },
     },
     layout_config = {
@@ -435,6 +440,7 @@ vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { d
 vim.keymap.set('n', '<leader>/', function()
   -- You can pass additional configuration to telescope to change theme, layout, etc.
   require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
+    -- TODO this looks garbage
     winblend = 10,
     previewer = false,
   })

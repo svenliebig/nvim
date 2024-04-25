@@ -6,6 +6,9 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = 'Move the current line up'
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { desc = 'Scroll up half and also center the screen' })
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = 'Scroll down half and also center the screen' })
 
+vim.keymap.set("n", "<C-o>", "<C-o>zz", { desc = 'Go to last and center the screen.' })
+vim.keymap.set("n", "<C-i>", "<C-i>zz", { desc = 'Go to next and center the screen.' })
+
 vim.keymap.set("n", "<leader>r", require('substitute').operator, { noremap = true })
 vim.keymap.set("n", "<leader>rr", require('substitute').line, { noremap = true })
 vim.keymap.set("n", "<leader>R", require('substitute').eol, { noremap = true })

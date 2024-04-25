@@ -117,9 +117,6 @@ require('lazy').setup({
       -- Adds LSP completion capabilities
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-path',
-
-      -- Adds a number of user-friendly snippets
-      'rafamadriz/friendly-snippets',
     },
   },
 
@@ -466,7 +463,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'pkl', 'python' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'pkl', 'python', 'java' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -534,6 +531,8 @@ vim.defer_fn(function()
   }
 end, 0)
 
+local jdtls = require('jdtls')
+
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
 local on_attach = function(client, bufnr)
@@ -551,13 +550,65 @@ local on_attach = function(client, bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
+  local vmap = function(keys, func, desc)
+    if desc then
+      desc = 'LSP: ' .. desc
+    end
+
+    vim.keymap.set('v', keys, func, { buffer = bufnr, desc = desc })
+  end
+
   nmap('<F2>', vim.lsp.buf.rename, 'Rename')
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', function()
     vim.lsp.buf.code_action { context = { only = { 'quickfix', 'refactor', 'source' } } }
   end, '[C]ode [A]ction')
 
-  nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+  if client.name == "gopls" then
+    nmap('Ö', function()
+      vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+
+      -- local choices = {}
+      -- table.insert(choices, 'hey')
+      -- table.insert(choices, 'bye 👋')
+      --
+      -- local sel = vim.fn.inputlist(choices)
+      --
+      -- if sel == 1 then
+      --   print('auch hey! 🤠')
+      -- else
+      --   print('.. bye! 👋')
+      -- end
+    end, 'Organize Imports')
+  end
+
+  if client.name == "jdtls" then
+    nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+    vmap('<leader>ca', function()
+      vim.lsp.buf.range_code_action()
+    end, '[C]ode [A]ction')
+    nmap('<leader>cev', jdtls.extract_variable, '[C]ode [E]tract [V]ariable')
+    nmap('<leader>cec', jdtls.extract_constant, '[C]ode [E]tract [C]onstant')
+    nmap('<leader>cem', jdtls.extract_method, '[C]ode [E]tract [M]ethod')
+    nmap('Ö', jdtls.organize_imports, 'Organize Imports')
+    nmap('<leader>co', jdtls.organize_imports, '[C]ode [O]rganize Imports')
+  else
+    nmap('gd', function()
+      -- log
+      require('telescope.builtin').lsp_definitions()
+
+      -- Wait a bit for the command to complete (may need to adjust delay)
+      vim.defer_fn(function() vim.cmd('norm zz') end, 10) -- Delay in milliseconds
+    end, '[G]oto [D]efinition')
+  end
+
+  -- nmap('gh', function()
+  --   print("hello world")
+  --   -- log
+  --   require('telescope.builtin').lsp_definitions()
+  --   vim.cmd('norm zz')
+  -- end, '[G]oto [D]efinition')
+
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
   nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
   nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
@@ -582,7 +633,7 @@ local on_attach = function(client, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 
   if client.name == 'tsserver' then
-    nmap('Ø', '<cmd>:OrganizeImports<CR>', 'Organize Imports')
+    nmap('Ö', '<cmd>:OrganizeImports<CR>', 'Organize Imports')
     nmap('<leader>co', '<cmd>:OrganizeImports<CR>', '[C]ode [O]rganize Imports')
   end
 end
@@ -620,6 +671,7 @@ require('which-key').register {
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
 require('which-key').register({
+  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
   ['<leader>'] = { name = 'VISUAL <leader>' },
   ['<leader>h'] = { 'Git [H]unk' },
 }, { mode = 'v' })
@@ -628,6 +680,7 @@ require('which-key').register({
 -- before setting up the servers.
 require('mason').setup()
 require('mason-lspconfig').setup()
+local home = os.getenv('HOME')
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -654,6 +707,36 @@ local servers = {
       -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
+  jdtls = {
+    cmd = {
+      'jdtls',
+      "--jvm-arg=" .. "-javaagent:" .. home .. "/workspace/software/lombok/lombok-edge-1.18.31.jar",
+      -- home .. '/workspace/software/jdk-17.0.10+7-eclipse-temurin/Contents/Home/bin/java',
+      -- '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+      -- '-Dosgi.bundles.defaultStartLevel=4',
+      -- '-Declipse.product=org.eclipse.jdt.ls.core.product',
+      -- '-Dlog.protocol=true',
+      -- '-Dlog.level=ERROR',
+      -- '-Dlogback.configurationFile=' .. home .. '/.config/nvim/configs/logback.xml',
+      -- '-Xmx8g',
+      -- -- '--add-modules=jdk.incubator.vector',
+      -- -- '--add-modules=ALL-SYSTEM',
+      -- '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+      -- '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+      --
+      -- -- lombok
+      -- '-javaagent:' .. home .. '/.local/share/nvim/mason/packages/jdtls/lombok.jar',
+      --
+      -- -- The jar file is located where jdtls was installed. This will need to be updated
+      -- -- to the location where you installed jdtls
+      -- '-jar', vim.fn.glob(home .. '/.local/share/nvim/mason/packages/jdtls/plugins/org.eclipse.equinox.launcher_*.jar'),
+      --
+      -- -- The configuration for jdtls is also placed where jdtls was installed. This will
+      -- -- need to be updated depending on your environment
+      -- '-configuration', home .. '/.local/share/nvim/mason/packages/jdtls/config_mac_arm',
+      -- '-data', home .. '/.local/share/eclipse' .. vim.fn.getcwd(),
+    }
+  }
 }
 
 -- Setup neovim lua configuration
@@ -691,7 +774,8 @@ mason_lspconfig.setup_handlers {
           organize_imports,
           description = "Organize Imports"
         }
-      }
+      },
+      cmd = (servers[server_name] or {}).cmd,
     }
   end,
 }
@@ -700,7 +784,12 @@ mason_lspconfig.setup_handlers {
 -- See `:help cmp`
 local cmp = require 'cmp'
 local luasnip = require 'luasnip'
-require('luasnip.loaders.from_vscode').lazy_load()
+require('luasnip.loaders.from_vscode').lazy_load(
+  {
+    paths = { home .. "/workspace/repositories/git/snippets" }
+  }
+)
+
 luasnip.config.setup {}
 
 cmp.setup {

@@ -713,6 +713,7 @@ local servers = {
       -- diagnostics = { disable = { 'missing-fields' } },
     },
   },
+  ["jsonls"] = {},
   jdtls = {
     cmd = {
       'jdtls',

@@ -31,6 +31,25 @@ local function merge_tables(t1, t2)
 	return t1
 end
 
+local function find_json_files_recursives(directory)
+	local results = {}
+	local entries = vim.fn.readdir(directory)
+
+	for _, entry in ipairs(entries) do
+		local entry_path = directory .. "/" .. entry
+
+		if vim.fn.isdirectory(entry_path) == 1 then
+			results = merge_tables(results, find_json_files_recursives(entry_path))
+		end
+
+		if vim.fn.isdirectory(entry_path) == 0 and vim.fn.fnamemodify(entry, ":e") == "json" then
+			results[entry_path] = true
+		end
+	end
+
+	return results
+end
+
 local function _flat_json(json, prefix)
 	local result = {}
 
@@ -57,4 +76,5 @@ return {
 	is_table = is_table,
 	merge_tables = merge_tables,
 	flat_json = flat_json,
+	find_json_files_recursives = find_json_files_recursives,
 }

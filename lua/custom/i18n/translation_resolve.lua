@@ -8,12 +8,18 @@ local find_translation_files = function()
 	local project_root = vim.fn.getcwd()
 
 	-- TODO more logic etc.
-	local translation_file = project_root .. "/src/locales/de.json"
+	local translations_root = project_root .. "/src/locales"
+
+	local files = utils.find_json_files_recursives(translations_root)
 
 	-- TODO need caching
 	-- How do we know if the file has changed?
-	if vim.fn.filereadable(translation_file) == 1 then
-		table.insert(translation_files, translation_file)
+	--
+	for translation_file, _ in pairs(files) do
+		-- utils.log("found translation file: " .. translation_file)
+		if vim.fn.filereadable(translation_file) == 1 then
+			table.insert(translation_files, translation_file)
+		end
 	end
 
 	return translation_files
@@ -23,12 +29,12 @@ end
 ---@param key string
 ---@return string
 local function resolve_translation(key)
-	utils.log("resolving translation: " .. key)
+	-- utils.log("resolving translation: " .. key)
 
 	local translation_files = find_translation_files()
 
 	for _, translation_file in ipairs(translation_files) do
-		utils.log("found translation: " .. translation_file)
+		-- utils.log("found translation: " .. translation_file)
 		local r = vim.fn.json_decode(vim.fn.readfile(translation_file))
 
 		local translations = utils.flat_json(r)

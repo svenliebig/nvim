@@ -20,7 +20,12 @@ local function highlight(bufnr, ns_id, node)
 	log("use the following ns id to highlight: " .. used_ns_id)
 end
 
+local function is_table(t)
+	return type(t) == 'table'
+end
+
 return {
 	log = log,
 	highlight = highlight,
+	is_table = is_table,
 }

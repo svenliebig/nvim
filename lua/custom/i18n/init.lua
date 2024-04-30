@@ -3,6 +3,14 @@ local resolver = require "custom.i18n.translation_resolve"
 
 local bufnr_ns_table = {}
 
+vim.api.nvim_create_user_command('I18nClear', function()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local ns_id = bufnr_ns_table[bufnr]
+	if ns_id then
+		vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
+	end
+end, {})
+
 vim.api.nvim_create_user_command('I18n', function()
 	local bufnr = vim.api.nvim_get_current_buf()
 	utils.log('bufnr: ' .. bufnr)

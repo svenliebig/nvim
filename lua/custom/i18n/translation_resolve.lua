@@ -7,14 +7,13 @@ local find_translation_files = function()
 
 	local project_root = vim.fn.getcwd()
 
-	-- TODO more logic etc.
+	-- TODO resolve this maybe from the .vscode/settings.json and other config files
 	local translations_root = project_root .. "/src/locales"
 
 	local files = utils.find_json_files_recursives(translations_root)
 
 	-- TODO need caching
 	-- How do we know if the file has changed?
-	--
 	for translation_file, _ in pairs(files) do
 		-- utils.log("found translation file: " .. translation_file)
 		if vim.fn.filereadable(translation_file) == 1 then

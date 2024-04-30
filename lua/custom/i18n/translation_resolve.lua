@@ -10,6 +10,8 @@ local find_translation_files = function()
 	-- TODO more logic etc.
 	local translation_file = project_root .. "/src/locales/de.json"
 
+	-- TODO need caching
+	-- How do we know if the file has changed?
 	if vim.fn.filereadable(translation_file) == 1 then
 		table.insert(translation_files, translation_file)
 	end
@@ -17,20 +19,9 @@ local find_translation_files = function()
 	return translation_files
 end
 
-local function flat_json(j, prefix)
-	local result = {}
-
-	for k, v in pairs(j) do
-		if utils.is_table(v) then
-			flat_json(v, prefix .. k .. ".")
-		else
-			result[prefix .. k] = v
-		end
-	end
-
-	return result
-end
-
+---Resolves a translation key to a translation string.
+---@param key string
+---@return string
 local function resolve_translation(key)
 	utils.log("resolving translation: " .. key)
 
@@ -40,13 +31,14 @@ local function resolve_translation(key)
 		utils.log("found translation: " .. translation_file)
 		local r = vim.fn.json_decode(vim.fn.readfile(translation_file))
 
-		local translations = flat_json(r, "")
+		local translations = utils.flat_json(r)
 
 		for k, v in pairs(translations) do
-			utils.log(k .. " -> " .. v)
+			if k == key then
+				return v
+			end
 		end
 	end
-
 
 	return key
 end

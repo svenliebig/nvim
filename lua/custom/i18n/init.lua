@@ -3,7 +3,7 @@ local resolver = require "custom.i18n.translation_resolve"
 
 local bufnr_ns_table = {}
 
-vim.api.nvim_create_user_command('Loser', function()
+vim.api.nvim_create_user_command('I18n', function()
 	local bufnr = vim.api.nvim_get_current_buf()
 	utils.log('bufnr: ' .. bufnr)
 	local ltree = vim.treesitter.get_parser(bufnr)
@@ -36,17 +36,6 @@ vim.api.nvim_create_user_command('Loser', function()
 		local func = match[1]
 		local args = match[2]
 		table.insert(t_nodes, { func, args })
-		local s1, s2, s3 = func:start()
-		local e1, e2, e3 = func:end_()
-
-		local as1, as2, as3 = args:start()
-		local ae1, ae2, ae3 = args:end_()
-
-		local al1, al2, al3, al4 = args:range()
-
-		utils.log(string.format("func start: %s:%s:%s, func end: %s %s %s", s1, s2, s3, e1, e2, e3))
-		utils.log(string.format("args start: %s:%s:%s, args end: %s %s %s", as1, as2, as3, ae1, ae2, ae3))
-		utils.log(string.format("args range: %s:%s:%s:%s", al1, al2, al3, al4))
 	end
 
 	local ns_id = bufnr_ns_table[bufnr]

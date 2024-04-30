@@ -24,8 +24,37 @@ local function is_table(t)
 	return type(t) == 'table'
 end
 
+local function merge_tables(t1, t2)
+	for k, v in pairs(t2) do
+		t1[k] = v
+	end
+	return t1
+end
+
+local function _flat_json(json, prefix)
+	local result = {}
+
+	for k, v in pairs(json) do
+		if is_table(v) then
+			result = merge_tables(result, _flat_json(v, prefix .. k .. "."))
+		else
+			result[prefix .. k] = v
+		end
+	end
+
+	return result
+end
+
+--- Flattens a JSON object of translations.
+--- @param json table
+local function flat_json(json)
+	return _flat_json(json, "")
+end
+
 return {
 	log = log,
 	highlight = highlight,
 	is_table = is_table,
+	merge_tables = merge_tables,
+	flat_json = flat_json,
 }

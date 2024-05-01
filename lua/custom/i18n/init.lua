@@ -1,15 +1,16 @@
 local utils = require "custom.i18n.utils"
+local log = require "custom.i18n.log"
 local resolver = require "custom.i18n.translation_resolve"
 
 local bufnr_ns_table = {}
 
-vim.api.nvim_create_autocmd("LspAttach", {
+vim.api.nvim_create_autocmd("BufEnter", { -- other events: BufEnter, BufWritePost, InsertLeave
 	-- this creates a group for auto commands
 	group = vim.api.nvim_create_augroup("I18n", {}),
 	pattern = { "*.js", "*.ts", "*.tsx", "*.jsx" },
 
 	callback = function(ev)
-		utils.log(string.format("LspAttach on buffer '%s'", ev.buf))
+		log.infof("attaching I18n to buffer '%s'", ev.buf)
 
 		-- todo only attach on specific file types
 		-- todo only attach when package.json is using i18n / or config says so?
@@ -22,6 +23,8 @@ vim.api.nvim_create_autocmd("LspAttach", {
 	end,
 })
 
+-- TODO: should we remove something on BufLeave?
+
 vim.api.nvim_create_user_command('I18nClear', function()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local ns_id = bufnr_ns_table[bufnr]
@@ -31,16 +34,17 @@ vim.api.nvim_create_user_command('I18nClear', function()
 end, {})
 
 vim.api.nvim_create_user_command('I18n', function(o)
-	utils.log("options: " .. vim.inspect(o))
+	log.debugf("options: %s", vim.inspect(o))
 	local bufnr = vim.api.nvim_get_current_buf()
-	utils.log('bufnr: ' .. bufnr)
+	log.debugf('bufnr: %d', bufnr)
+
 	local ltree = vim.treesitter.get_parser(bufnr)
 	local stree = ltree:parse()
 	local root = stree[1]:root()
-	utils.log('current buffer language: ' .. ltree:lang())
+	log.debugf('current buffer language: %s', ltree:lang())
 
 	if not vim.tbl_contains({ "javascript", "typescript", "tsx", "jsx" }, ltree:lang()) then
-		utils.log("Not a supported language: " .. ltree:lang())
+		log.infof("not a supported language '%s'", ltree:lang())
 		return {}
 	end
 
@@ -68,11 +72,11 @@ vim.api.nvim_create_user_command('I18n', function(o)
 
 	local ns_id = bufnr_ns_table[bufnr]
 	if ns_id then
-		utils.log(string.format("clearing namespace '%s' on buffer '%s'", ns_id, bufnr))
+		log.debugf("clearing namespace '%s' on buffer '%s'", ns_id, bufnr)
 		vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 	else
-		ns_id = vim.api.nvim_create_namespace('svenliebig')
-		utils.log("creating namespace: " .. ns_id)
+		ns_id = vim.api.nvim_create_namespace('i18n')
+		log.debugf("creating namespace '%s'", ns_id)
 		bufnr_ns_table[bufnr] = ns_id
 	end
 
@@ -82,8 +86,6 @@ vim.api.nvim_create_user_command('I18n', function(o)
 		local srow, scol = args:range()
 
 		utils.highlight(bufnr, ns_id, args)
-
-		utils.log("highlighted: " .. args:range())
 
 		local i18nkey = vim.treesitter.get_node_text(args, bufnr)
 		local translation = resolver.resolve_translation(i18nkey)

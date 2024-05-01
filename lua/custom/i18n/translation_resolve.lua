@@ -1,4 +1,12 @@
 local utils = require "custom.i18n.utils"
+local log = require "custom.i18n.log"
+
+-- function Translation:new()
+-- 	local translation = {}
+-- 	setmetatable(translation, self)
+-- 	self.__index = self
+-- 	return translation
+-- end
 
 ---@return table<string, string>
 local find_translation_files = function()
@@ -15,7 +23,7 @@ local find_translation_files = function()
 	-- TODO need caching
 	-- How do we know if the file has changed?
 	for translation_file, _ in pairs(files) do
-		-- utils.log("found translation file: " .. translation_file)
+		log.debugf("found translation file '%s'", translation_file)
 		if vim.fn.filereadable(translation_file) == 1 then
 			table.insert(translation_files, translation_file)
 		end
@@ -28,7 +36,7 @@ end
 ---@param key string
 ---@return string
 local function resolve_translation(key)
-	-- utils.log("resolving translation: " .. key)
+	log.debugf("resolving translation key '%s'", key)
 
 	local translation_files = find_translation_files()
 

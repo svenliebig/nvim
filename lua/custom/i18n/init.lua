@@ -8,6 +8,7 @@ vim.api.nvim_create_autocmd("BufEnter", { -- other events: BufEnter, BufWritePos
 	-- this creates a group for auto commands
 	group = vim.api.nvim_create_augroup("I18n", {}),
 	pattern = { "*.js", "*.ts", "*.tsx", "*.jsx" },
+	once = true,
 
 	-- this happens mutliple times for single buffers, I'm not sure if this is correct
 	callback = function(ev)

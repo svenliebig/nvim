@@ -1,3 +1,5 @@
+local log = require('custom.i18n.log')
+
 --- @param bufnr buffer
 --- @param ns_id number
 --- @param node TSNode
@@ -41,6 +43,33 @@ local function find_json_files_recursives(directory)
 	return results
 end
 
+--- Finds all JSON files that have been modified since a given timestamp.
+--- @param directory string
+--- @param last_timestamp number
+local function find_new_json_files(directory, last_timestamp)
+	local results = {}
+	local entries = vim.fn.readdir(directory)
+
+	for _, entry in ipairs(entries) do
+		local entry_path = directory .. "/" .. entry
+
+		if vim.fn.isdirectory(entry_path) == 1 then
+			results = merge_tables(results, find_new_json_files(entry_path, last_timestamp))
+		end
+
+		if vim.fn.isdirectory(entry_path) == 0 and vim.fn.fnamemodify(entry, ":e") == "json" then
+			local timestamp = vim.fn.getftime(entry_path)
+
+			log.debugf("entry '%s' has timestamp '%s' (compare to %s)", entry_path, timestamp, last_timestamp)
+			if timestamp > last_timestamp then
+				results[entry_path] = true
+			end
+		end
+	end
+
+	return results
+end
+
 local function _flat_json(json, prefix)
 	local result = {}
 
@@ -67,4 +96,5 @@ return {
 	merge_tables = merge_tables,
 	flat_json = flat_json,
 	find_json_files_recursives = find_json_files_recursives,
+	find_new_json_files = find_new_json_files,
 }

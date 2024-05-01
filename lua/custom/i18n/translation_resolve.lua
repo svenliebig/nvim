@@ -1,8 +1,42 @@
 local utils = require "custom.i18n.utils"
 local log = require "custom.i18n.log"
 
+---@class TranslationFile
+---@field file_path string
+---@field buffer buffer
+---@field dirty boolean
+local TranslationFile = {}
+
+function TranslationFile:new(file_path, buffer)
+	local o = {}
+
+	setmetatable(o, self)
+	self.__index = self
+
+	o.file_path = file_path
+	o.buffer = buffer
+
+	vim.api.nvim_buf_attach(o.buffer, false, {
+		on_lines = function()
+			log.debugf("buffer '%s' changed", o.buffer)
+		end,
+		on_detach = function()
+			log.debugf("buffer '%s' detached", o.buffer)
+			-- TODO maybe remove buffer ... should be done in add_buffer probably
+		end,
+	})
+
+	return o
+end
+
+function TranslationFile:content()
+	local content = vim.api.nvim_buf_get_lines(self.buffer, 0, -1, false)
+	return content
+end
+
 ---@class TranslationFiles
----@field buffers table<string, buffer>
+---@field buffers table<string, TranslationFile>
+---@field diry boolean
 local translation_files = {
 	buffers = {},
 }
@@ -18,16 +52,20 @@ function translation_files:contains(name)
 end
 
 function translation_files:add_buffer(file_path, buf)
-	self.buffers[file_path] = buf
-	-- vim.api.nvim_buf_attach(buf, false, {
-	-- 	on_lines = function()
-	-- 		log.debugf("buffer '%s' changed", buf)
-	-- 	end,
-	-- 	on_detach = function()
-	-- 		log.debugf("buffer '%s' detached", buf)
-	-- 		self.buffers[buf] = nil
-	-- 	end,
-	-- })
+	self.buffers[file_path] = TranslationFile:new(file_path, buf)
+end
+
+function translation_files:get_buffer(file_path)
+	return self.buffers[file_path]
+end
+
+function translation_files:get_buffer_content(file_path)
+	local buf = self:get_buffer(file_path)
+	if not buf then
+		return nil
+	end
+
+	return vim.api.nvim_buf_get_lines(buf.buffer, 0, -1, false)
 end
 
 function translation_files:add(file_path)
@@ -57,10 +95,11 @@ function translation_files:add(file_path)
 	end
 
 	local buf = vim.fn.bufadd(file_path)
+	vim.fn.bufload(buf)
+
 	self:add_buffer(file_path, buf)
 end
 
----@return table<string, buffer>
 local find_translation_files = function()
 	local project_root = vim.fn.getcwd()
 
@@ -85,8 +124,8 @@ local function resolve_translation(key)
 
 	local files = find_translation_files()
 
-	for file, _ in pairs(files) do
-		local r = vim.fn.json_decode(vim.fn.readfile(file))
+	for path, file in pairs(files) do
+		local r = vim.fn.json_decode(file:content())
 		local translations = utils.flat_json(r)
 
 		for k, v in pairs(translations) do

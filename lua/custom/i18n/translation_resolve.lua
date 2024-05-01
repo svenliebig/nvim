@@ -107,6 +107,9 @@ local find_translation_files = function()
 	local translations_root = project_root .. "/src/locales"
 	local files = utils.find_json_files_recursives(translations_root)
 
+	-- TODO check if the file list has changed, and if any file in the translations are dirty
+	--      we probably don't care about dirt tbh
+
 	-- TODO need caching
 	-- How do we know if the file has changed?
 	for translation_file, _ in pairs(files) do

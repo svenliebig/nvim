@@ -36,30 +36,56 @@ local function log(message)
 	end
 end
 
+--- Log a debug message
+--- @param message string
+--- @return nil
 local function debug(message)
 	if should_log('debug') then
 		log(string.format("[DEBUG] %s", message))
 	end
 end
 
+--- Log a formatted debug message
+--- @param message string
+--- @param ... any
+--- @return nil
 local function debugf(message, ...)
 	if should_log('debug') then
 		debug(string.format(message, ...))
 	end
 end
 
+--- Log an info message
+--- @param message string
+--- @return nil
 local function info(message)
 	if should_log('info') then
 		log(string.format("[INFO] %s", message))
 	end
 end
 
+--- Log a formatted info message
+--- @param message string
+--- @param ... any
+--- @return nil
+local function infof(message, ...)
+	if should_log('info') then
+		info(string.format(message, ...))
+	end
+end
+
+--- Log a warning message
+--- @param message string
+--- @return nil
 local function warn(message)
 	if should_log('warn') then
 		log(string.format("[WARN] %s", message))
 	end
 end
 
+--- Log an error message
+--- @param message string
+--- @return nil
 local function error(message)
 	if should_log('error') then
 		log(string.format("[ERROR] %s", message))
@@ -71,6 +97,7 @@ return {
 	debug = debug,
 	debugf = debugf,
 	info = info,
+	infof = infof,
 	warn = warn,
 	error = error,
 }

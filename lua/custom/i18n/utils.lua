@@ -1,12 +1,10 @@
-local log = require "custom.i18n.log"
-
 --- @param bufnr buffer
 --- @param ns_id number
 --- @param node TSNode
 local function highlight(bufnr, ns_id, node)
 	local line, start, _, end_ = node:range()
-	local used_ns_id = vim.api.nvim_buf_add_highlight(bufnr, ns_id, 'LspReferenceText', line, start, end_)
-	log.debugf("used the ns '%s' to highlight", used_ns_id)
+	vim.api.nvim_buf_add_highlight(bufnr, ns_id, 'LspReferenceText', line, start, end_)
+	-- log.debugf("used the ns '%s' to highlight", used_ns_id)
 end
 
 local function is_table(t)
@@ -20,7 +18,11 @@ local function merge_tables(t1, t2)
 	return t1
 end
 
+--- Recursively finds all JSON files in a directory.
+--- @param directory string
+--- @return table<string, boolean>
 local function find_json_files_recursives(directory)
+	---@type table<string, boolean>
 	local results = {}
 	local entries = vim.fn.readdir(directory)
 

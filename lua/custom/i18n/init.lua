@@ -9,14 +9,17 @@ vim.api.nvim_create_autocmd("BufEnter", { -- other events: BufEnter, BufWritePos
 	group = vim.api.nvim_create_augroup("I18n", {}),
 	pattern = { "*.js", "*.ts", "*.tsx", "*.jsx" },
 
+	-- this happens mutliple times for single buffers, I'm not sure if this is correct
 	callback = function(ev)
+		-- log.debugf("event: %s", vim.inspect(ev))
 		log.infof("attaching I18n to buffer '%s'", ev.buf)
 
 		-- todo only attach on specific file types
 		-- todo only attach when package.json is using i18n / or config says so?
 
-		vim.keymap.set("n", "<leader>is", ":I18n<CR>", { buffer = true, desc = "i18n: translate inline" })
-		vim.keymap.set("n", "<leader>ic", ":I18nClear<CR>", { buffer = true, desc = "i18n: clear translations" })
+		vim.keymap.set("n", "<leader>is", ":I18n<CR>", { buffer = true, desc = "i18n: translate inline", silent = true })
+		vim.keymap.set("n", "<leader>ic", ":I18nClear<CR>",
+			{ buffer = true, desc = "i18n: clear translations", silent = true })
 		-- vim.api.nvim_command("I18n")
 
 		-- setup things that are only available in that buffer
@@ -33,18 +36,15 @@ vim.api.nvim_create_user_command('I18nClear', function()
 	end
 end, {})
 
-vim.api.nvim_create_user_command('I18n', function(o)
-	log.debugf("options: %s", vim.inspect(o))
+vim.api.nvim_create_user_command('I18n', function()
 	local bufnr = vim.api.nvim_get_current_buf()
-	log.debugf('bufnr: %d', bufnr)
 
 	local ltree = vim.treesitter.get_parser(bufnr)
 	local stree = ltree:parse()
 	local root = stree[1]:root()
-	log.debugf('current buffer language: %s', ltree:lang())
 
 	if not vim.tbl_contains({ "javascript", "typescript", "tsx", "jsx" }, ltree:lang()) then
-		log.infof("not a supported language '%s'", ltree:lang())
+		log.errorf("not a supported language '%s'", ltree:lang())
 		return {}
 	end
 
@@ -72,11 +72,11 @@ vim.api.nvim_create_user_command('I18n', function(o)
 
 	local ns_id = bufnr_ns_table[bufnr]
 	if ns_id then
-		log.debugf("clearing namespace '%s' on buffer '%s'", ns_id, bufnr)
+		-- log.debugf("clearing namespace '%s' on buffer '%s'", ns_id, bufnr)
 		vim.api.nvim_buf_clear_namespace(bufnr, ns_id, 0, -1)
 	else
 		ns_id = vim.api.nvim_create_namespace('i18n')
-		log.debugf("creating namespace '%s'", ns_id)
+		-- log.debugf("creating namespace '%s'", ns_id)
 		bufnr_ns_table[bufnr] = ns_id
 	end
 

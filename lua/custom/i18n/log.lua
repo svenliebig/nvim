@@ -92,6 +92,16 @@ local function error(message)
 	end
 end
 
+--- Log a formatted error message
+--- @param message string
+--- @param ... any
+--- @return nil
+local function errorf(message, ...)
+	if should_log('error') then
+		error(string.format(message, ...))
+	end
+end
+
 return {
 	log = log,
 	debug = debug,
@@ -100,4 +110,5 @@ return {
 	infof = infof,
 	warn = warn,
 	error = error,
+	errorf = errorf,
 }

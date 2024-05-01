@@ -3,6 +3,25 @@ local resolver = require "custom.i18n.translation_resolve"
 
 local bufnr_ns_table = {}
 
+vim.api.nvim_create_autocmd("LspAttach", {
+	-- this creates a group for auto commands
+	group = vim.api.nvim_create_augroup("I18n", {}),
+	pattern = { "*.js", "*.ts", "*.tsx", "*.jsx" },
+
+	callback = function(ev)
+		utils.log(string.format("LspAttach on buffer '%s'", ev.buf))
+
+		-- todo only attach on specific file types
+		-- todo only attach when package.json is using i18n / or config says so?
+
+		vim.keymap.set("n", "<leader>is", ":I18n<CR>", { buffer = true, desc = "i18n: translate inline" })
+		vim.keymap.set("n", "<leader>ic", ":I18nClear<CR>", { buffer = true, desc = "i18n: clear translations" })
+		-- vim.api.nvim_command("I18n")
+
+		-- setup things that are only available in that buffer
+	end,
+})
+
 vim.api.nvim_create_user_command('I18nClear', function()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local ns_id = bufnr_ns_table[bufnr]
@@ -11,7 +30,8 @@ vim.api.nvim_create_user_command('I18nClear', function()
 	end
 end, {})
 
-vim.api.nvim_create_user_command('I18n', function()
+vim.api.nvim_create_user_command('I18n', function(o)
+	utils.log("options: " .. vim.inspect(o))
 	local bufnr = vim.api.nvim_get_current_buf()
 	utils.log('bufnr: ' .. bufnr)
 	local ltree = vim.treesitter.get_parser(bufnr)

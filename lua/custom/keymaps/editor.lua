@@ -18,6 +18,9 @@ vim.keymap.set('i', '<C-q>', '<Plug>(copilot-suggest)')
 vim.keymap.set('i', '<C-a>', 'copilot#Accept()',
   { noremap = false, silent = true, expr = true, replace_keycodes = false })
 
+vim.keymap.set('i', 'C-f>', ':Ex<CR>', { desc = 'Open file explorer' })
+vim.keymap.set('n', 'C-f>', ':Ex<CR>', { desc = 'Open file explorer' })
+vim.keymap.set('v', 'C-f>', ':Ex<CR>', { desc = 'Open file explorer' })
 
 -- substitude current selection in file
 vim.keymap.set("v", "<leader>csf", "y:%s/<C-r>0/<C-r>0/gI<Left><Left><Left>",

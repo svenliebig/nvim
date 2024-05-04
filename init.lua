@@ -368,6 +368,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   pattern = '*',
 })
 
+-- [[ Configure Overseer ]]
+require('overseer').setup(
+  { templates = { "builtin", "user.go_test_script" } }
+)
+
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {

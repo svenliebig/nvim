@@ -1,4 +1,4 @@
-vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open the file explorer' })
+-- vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open the file explorer' })
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = 'Move the current line down' })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = 'Move the current line up' })
@@ -8,6 +8,9 @@ vim.keymap.set("n", "<C-d>", "<C-d>zz", { desc = 'Scroll down half and also cent
 
 vim.keymap.set("n", "<C-o>", "<C-o>zz", { desc = 'Go to last and center the screen.' })
 vim.keymap.set("n", "<C-i>", "<C-i>zz", { desc = 'Go to next and center the screen.' })
+
+vim.keymap.set("n", "n", "nzz", { desc = 'Search next and center the screen.' })
+vim.keymap.set("n", "N", "Nzz", { desc = 'Search previous and center the screen.' })
 
 vim.keymap.set("n", "<leader>r", require('substitute').operator, { noremap = true })
 vim.keymap.set("n", "<leader>rr", require('substitute').line, { noremap = true })

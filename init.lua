@@ -199,19 +199,19 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Theme inspired by Atom
-    'navarasu/onedark.nvim',
-    priority = 1000,
-    lazy = false,
-    config = function()
-      require('onedark').setup {
-        -- Set a style preset. 'dark' is default.
-        style = 'dark', -- dark, darker, cool, deep, warm, warmer, light
-      }
-      require('onedark').load()
-    end,
-  },
+  -- {
+  --   -- Theme inspired by Atom
+  --   'navarasu/onedark.nvim',
+  --   priority = 1000,
+  --   lazy = false,
+  --   config = function()
+  --     require('onedark').setup {
+  --       -- Set a style preset. 'dark' is default.
+  --       style = 'dark', -- dark, darker, cool, deep, warm, warmer, light
+  --     }
+  --     require('onedark').load()
+  --   end,
+  -- },
 
   {
     -- Set lualine as statusline
@@ -615,6 +615,13 @@ local on_attach = function(client, bufnr)
     end, '[G]oto [D]efinition')
   end
 
+  if client.name == "clangd" then
+    client.server_capabilities.signatureHelpProvider = false
+    nmap('Ö', function()
+      vim.lsp.buf.code_action({ context = { diagnostics = { source = 'clangd', severity = 'Hint' } } })
+    end, 'Organize Imports')
+  end
+
   -- nmap('gh', function()
   --   print("hello world")
   --   -- log
@@ -704,7 +711,7 @@ local home = os.getenv('HOME')
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
-  -- clangd = {},
+  clangd = {},
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},

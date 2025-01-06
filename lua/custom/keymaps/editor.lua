@@ -1,5 +1,4 @@
 -- vim.keymap.set('n', '<leader>e', vim.cmd.Ex, { desc = 'Open the file explorer' })
-
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = 'Move the current line down' })
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = 'Move the current line up' })
 
@@ -21,6 +20,12 @@ vim.keymap.set('i', '<C-q>', '<Plug>(copilot-suggest)')
 vim.keymap.set('i', '<C-a>', 'copilot#Accept()',
   { noremap = false, silent = true, expr = true, replace_keycodes = false }
 )
+
+vim.keymap.set('i', '‘', '<Plug>(copilot-next)')
+vim.keymap.set('i', '“', '<Plug>(copilot-previous)')
+
+-- vim.keymap.set('i', '<C-[>', '<Plug>(copilot-previous)')
+-- vim.keymap.set('i', '<C-]>', '<Plug>(copilot-next)')
 
 vim.keymap.set('i', '<C-f>', ':Ex<CR>', { desc = 'Open file explorer' })
 vim.keymap.set('n', '<C-f>', ':Ex<CR>', { desc = 'Open file explorer' })
